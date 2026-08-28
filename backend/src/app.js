@@ -35,7 +35,19 @@ app.use(
 );
 app.use(
   cors({
-    origin: [config.clientUrl, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: (origin, callback) => {
+      const allowed = [
+        config.clientUrl,
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+      ];
+      // Allow all Vercel domains (production + preview deployments)
+      if (!origin || allowed.includes(origin) || /\.vercel\.app$/.test(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked for origin: ${origin}`));
+      }
+    },
     credentials: true,
   })
 );
