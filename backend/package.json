@@ -1,0 +1,36 @@
+{
+  "name": "food-waste-management-backend",
+  "version": "2.0.0",
+  "description": "Pure MongoDB Backend API and Agentic AI Orchestration Service for FoodFlow",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "node test_e2e_mongo_flow.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.8.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  },
+  "keywords": [
+    "express",
+    "mongodb",
+    "mongoose",
+    "agentic-ai",
+    "socketio"
+  ]
+}
