@@ -215,7 +215,7 @@ function LiveTrackingMapPageInner() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans bg-grid">
+    <div className="min-h-screen bg-[#FAF8F5] text-slate-800 flex flex-col font-sans bg-warm-grid">
       <Navbar />
 
       <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-6 space-y-6">

@@ -47,11 +47,11 @@ export default function DashboardPage() {
       quantityValue: 40,
       quantityUnit: 'KG',
       storageTemp: 'REFRIGERATED',
-      donor: { organizationName: 'Deedarsh (The Green Bistro)' },
+      donor: { organizationName: 'The Green Bistro (Food Donor)' },
     },
     match: {
       recipient: {
-        organizationName: 'Jersin (Peelamedu NGO Shelter)',
+        organizationName: 'Peelamedu NGO Shelter',
         contactPhone: '+91 98400 44556',
       },
     },
@@ -70,8 +70,8 @@ export default function DashboardPage() {
     profile?.fullName ||
     user?.name ||
     user?.email?.split('@')[0] ||
-    'Dharshan';
-  const email = user?.email || 'dharshanrichyrich@gmail.com';
+    (user ? 'User Profile' : 'Guest Operator');
+  const email = user?.email || (user ? 'authenticated@foodflow.org' : 'Guest Session');
 
   const advanceDeliveryStatus = (nextStatus) => {
     if (nextStatus === 'COMPLETED') {
@@ -87,20 +87,20 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans bg-grid">
+    <div className="min-h-screen bg-[#FAF8F5] text-slate-800 flex flex-col font-sans bg-warm-grid">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Top Welcome Banner Matching User Screenshot */}
-        <div className="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        {/* Top Welcome Banner */}
+        <div className="rounded-2xl bg-white border border-[#E5E2DC] p-6 sm:p-8 shadow-subtle relative overflow-hidden flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="space-y-3 z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold tracking-wide uppercase">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f0f7f3] border border-[#b9ddc8] text-[#1b4332] text-xs font-bold tracking-wide uppercase">
+              <span className="w-2 h-2 rounded-full bg-[#1b4332] animate-pulse" />
               ACTIVE ROLE PORTAL — {activeRole.toUpperCase()}
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-              Welcome back, <span className="text-emerald-600">{displayName}</span>
+              Welcome back, <span className="text-[#1b4332]">{displayName}</span>
             </h1>
 
             <p className="text-sm text-slate-500">

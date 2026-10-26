@@ -22,11 +22,11 @@ import {
 } from 'lucide-react';
 
 export default function VolunteerDashboard() {
-  const { user } = useAuth();
+  const { user, profile: authProfile } = useAuth();
   const [profile, setProfile] = useState({
-    fullName: 'Kumaran',
-    vehicleType: 'CAR',
-    vehicleCapacityKg: 75,
+    fullName: authProfile?.fullName || user?.name || user?.email?.split('@')[0] || 'Volunteer Courier',
+    vehicleType: authProfile?.vehicleType || 'CAR',
+    vehicleCapacityKg: authProfile?.vehicleCapacityKg || 75,
     isAvailable: true,
     activeHours: '08:00 - 20:00',
   });
@@ -65,11 +65,11 @@ export default function VolunteerDashboard() {
             quantityValue: 40,
             quantityUnit: 'KG',
             storageTemp: 'REFRIGERATED',
-            donor: { organizationName: 'Deedarsh (The Green Bistro)' },
+            donor: { organizationName: 'The Green Bistro (Food Donor)' },
           },
           match: {
             recipient: {
-              organizationName: 'Jersin (Peelamedu NGO Shelter)',
+              organizationName: 'Peelamedu NGO Shelter',
               contactPhone: '+91 98400 44556',
             },
           },
@@ -132,12 +132,12 @@ export default function VolunteerDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans bg-grid">
+    <div className="min-h-screen bg-[#FAF8F5] text-slate-800 flex flex-col font-sans bg-warm-grid">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Banner */}
-        <div className="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-7 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="rounded-2xl bg-white border border-[#E5E2DC] p-6 sm:p-7 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center font-bold">
               <Truck className="w-6 h-6" />

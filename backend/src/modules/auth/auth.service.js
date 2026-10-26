@@ -209,18 +209,26 @@ export class AuthService {
     const normalizedRole = role.toLowerCase();
     const demoEmail =
       normalizedRole === 'volunteer'
-        ? 'dharshanrichyrich@gmail.com'
+        ? 'volunteer@foodflow.org'
         : normalizedRole === 'donor'
         ? 'donor@greenbistro.com'
         : normalizedRole === 'recipient'
         ? 'shelter@peelamedu.org'
         : 'admin@foodflow.ai';
 
-    let user = await User.findOne({ email: demoEmail }).select('+passwordHash +role +isVerified');
+    // Also check seed user emails as alternates
+    const altEmails = {
+      volunteer: ['kumaran@foodflow.org', 'volunteer@foodflow.org'],
+      donor: ['deedarsh@greenbistro.com', 'donor@greenbistro.com'],
+      recipient: ['jersin@peelamedu.org', 'shelter@peelamedu.org'],
+      admin: ['dharshanrichyrich@gmail.com', 'admin@foodflow.ai', 'dharshan@foodflow.org'],
+    }[normalizedRole] || [demoEmail];
+
+    let user = await User.findOne({ email: { $in: altEmails } }).select('+passwordHash +role +isVerified');
 
     if (!user) {
       // Auto-create demo user if not present
-      const defaultPasswordHash = await User.hashPassword('dharshan2006');
+      const defaultPasswordHash = await User.hashPassword('DemoAuth2026!');
       user = await User.create({
         email: demoEmail,
         passwordHash: defaultPasswordHash,
@@ -231,18 +239,19 @@ export class AuthService {
       if (normalizedRole === 'volunteer') {
         await VolunteerProfile.create({
           userId: user._id,
-          fullName: 'dharshan (Arun Kumar)',
+          fullName: 'Food Rescue Volunteer',
           contactPhone: '+91 98765 43210',
           vehicleType: 'CAR',
           vehicleCapacityKg: 75.0,
           isAvailable: true,
           currentLatitude: 11.0168,
           currentLongitude: 76.9678,
+          activeHours: '8:00 AM - 9:00 PM',
         });
       } else if (normalizedRole === 'donor') {
         await DonorProfile.create({
           userId: user._id,
-          organizationName: 'The Green Bistro',
+          organizationName: 'The Green Bistro (Food Donor)',
           contactPhone: '+91 98200 11223',
           address: 'Sathy Road, Saravanampatti, Coimbatore',
           latitude: 11.0805,
@@ -252,14 +261,14 @@ export class AuthService {
       } else if (normalizedRole === 'recipient') {
         await RecipientProfile.create({
           userId: user._id,
-          organizationName: 'Peelamedu NGO Shelter & Kitchen',
+          organizationName: 'Peelamedu NGO Shelter',
           recipientType: 'SHELTER',
           contactPhone: '+91 98400 44556',
           address: 'Avinashi Road, Peelamedu, Coimbatore',
           latitude: 11.0315,
           longitude: 77.0175,
           capacityMealsPerDay: 250,
-          dietaryPreferences: ['COOKED_FOOD', 'VEGETARIAN', 'HALAL'],
+          dietaryPreferences: ['COOKED_FOOD', 'VEGETARIAN'],
         });
       }
     }

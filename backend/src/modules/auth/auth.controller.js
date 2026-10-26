@@ -54,6 +54,21 @@ export class AuthController {
     }
   }
 
+  static async demoLogin(req, res) {
+    try {
+      const { role = 'donor' } = req.body;
+      const validRoles = ['volunteer', 'donor', 'recipient', 'admin'];
+      const normalizedRole = String(role).toLowerCase().trim();
+      if (!validRoles.includes(normalizedRole)) {
+        return sendError(res, 'Invalid role requested for demo authentication', 400);
+      }
+      const result = await AuthService.quickDemoLogin(normalizedRole);
+      return sendSuccess(res, result, `Authenticated legitimately as demo ${normalizedRole}`);
+    } catch (error) {
+      return sendError(res, error.message, 400);
+    }
+  }
+
   static async refreshToken(req, res) {
     try {
       const validated = refreshSchema.parse(req.body);

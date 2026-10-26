@@ -23,7 +23,7 @@ export const Input = React.forwardRef(({
   return (
     <div className="w-full space-y-1.5 text-left">
       {label && (
-        <label htmlFor={inputId} className="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+        <label htmlFor={inputId} className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
           {label}
         </label>
       )}
@@ -40,10 +40,10 @@ export const Input = React.forwardRef(({
           type={effectiveType}
           className={twMerge(
             clsx(
-              'block w-full rounded-xl bg-white border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-all duration-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none disabled:bg-slate-100 disabled:opacity-50 shadow-sm',
+              'block w-full rounded-xl bg-white border border-[#E5E2DC] px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-all duration-150 focus:border-[#1b4332] focus:ring-2 focus:ring-[#1b4332]/15 focus:outline-none disabled:bg-slate-100 disabled:opacity-50 shadow-sm',
               Icon && 'pl-10',
               isPasswordType && showPasswordToggle && 'pr-11',
-              error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
+              error && 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20',
               className
             )
           )}
@@ -55,19 +55,19 @@ export const Input = React.forwardRef(({
             type="button"
             tabIndex={-1}
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-emerald-600 focus:outline-none transition-colors"
+            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-[#1b4332] focus:outline-none transition-colors"
             title={showPassword ? 'Hide password' : 'Show password'}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? (
-              <EyeOff className="h-4 w-4 text-emerald-600" />
+              <EyeOff className="h-4 w-4 text-[#1b4332]" />
             ) : (
               <Eye className="h-4 w-4" />
             )}
           </button>
         )}
       </div>
-      {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
+      {error && <p className="text-xs text-rose-600 font-medium">{error}</p>}
       {helperText && !error && <p className="text-xs text-slate-500">{helperText}</p>}
     </div>
   );

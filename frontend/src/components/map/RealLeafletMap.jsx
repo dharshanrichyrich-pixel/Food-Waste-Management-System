@@ -54,9 +54,22 @@ export class MapErrorBoundary extends Component {
   }
 }
 
-// Controller to safely move/fly camera
+// Controller to safely move/fly camera and handle responsive resizing
 function MapController({ center, zoom }) {
   const map = useMap();
+
+  useEffect(() => {
+    // Invalidate size on mount and window resize
+    const handleResize = () => {
+      try {
+        map.invalidateSize();
+      } catch (e) {}
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [map]);
+
   useEffect(() => {
     if (
       center &&
@@ -68,7 +81,7 @@ function MapController({ center, zoom }) {
       !isNaN(center[1])
     ) {
       try {
-        map.flyTo(center, zoom || 12, { duration: 1.0 });
+        map.flyTo(center, zoom || 12, { duration: 0.8 });
       } catch (e) {
         // ignore map animation errors
       }
@@ -254,12 +267,12 @@ function LeafletMapInner({
   const tileLayerUrl =
     mapTileMode === 'Satellite'
       ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+      : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
   const tileAttribution =
     mapTileMode === 'Satellite'
-      ? '&copy; <a href="https://www.esri.com/">Esri</a>, Earthstar Geographics'
-      : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+      ? '&copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a>, Earthstar Geographics'
+      : '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors';
 
   // Sanitize route coordinates
   const rawRoute = mapData?.activeRoute?.coordinates || [];
@@ -618,10 +631,10 @@ function LeafletMapInner({
       </MapContainer>
 
       {/* Floating Map Watermark Badge */}
-      <div className="absolute top-4 left-4 z-[400] px-3 py-1.5 rounded-xl bg-white/95 border border-slate-200 shadow-md backdrop-blur-md flex items-center gap-2 pointer-events-none">
-        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span className="text-xs font-extrabold text-slate-900">Coimbatore Live Telemetry</span>
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">
+      <div className="absolute top-4 left-4 z-[400] px-3.5 py-2 rounded-xl bg-white/95 border border-[#E5E2DC] shadow-sm backdrop-blur-md flex items-center gap-2.5 pointer-events-none">
+        <span className="w-2 h-2 rounded-full bg-[#1b4332] animate-pulse" />
+        <span className="text-xs font-bold text-slate-900">Coimbatore Live Telemetry</span>
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f0f7f3] border border-[#b9ddc8] text-[#1b4332] font-semibold">
           OpenStreetMap &bull; Leaflet
         </span>
       </div>

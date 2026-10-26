@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export default function RecipientDashboard() {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [availableDonations, setAvailableDonations] = useState([]);
   const [stats, setStats] = useState({
     dailyCapacity: 250,
@@ -75,19 +75,19 @@ export default function RecipientDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans bg-grid">
+    <div className="min-h-screen bg-[#FAF8F5] text-slate-800 flex flex-col font-sans bg-warm-grid">
       <Navbar />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Banner */}
-        <div className="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="rounded-2xl bg-white border border-[#E5E2DC] p-6 sm:p-8 shadow-subtle flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
               Verified NGO Recipient Hub
             </div>
             <h1 className="text-3xl font-extrabold text-slate-900">
-              {profile?.organizationName || 'Jersin (Peelamedu NGO Shelter)'}
+              {profile?.organizationName || user?.name || user?.email?.split('@')[0] || 'Accredited Recipient Shelter'}
             </h1>
             <p className="text-sm text-slate-500">
               Claim fresh surplus batches verified by the autonomous FoodAgent. Matched batches are automatically assigned to nearby couriers.

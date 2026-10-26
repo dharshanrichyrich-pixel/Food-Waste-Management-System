@@ -7,6 +7,7 @@ const router = Router();
 // Public Auth Endpoints (MongoDB)
 router.post('/signup', AuthController.signup);
 router.post('/login', AuthController.login);
+router.post('/demo-login', AuthController.demoLogin);
 router.post('/refresh-token', AuthController.refreshToken);
 router.post('/forgot-password', AuthController.forgotPassword);
 router.post('/reset-password', AuthController.resetPassword);

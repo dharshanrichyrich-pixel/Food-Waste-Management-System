@@ -87,46 +87,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   const quickDemoLogin = async (role) => {
-    let demoEmail = 'dharshanrichyrich@gmail.com';
-    if (role === 'donor') demoEmail = 'deedarsh@greenbistro.com';
-    else if (role === 'recipient') demoEmail = 'jersin@peelamedu.org';
-    else if (role === 'volunteer') demoEmail = 'kumaran@foodflow.org';
-    else if (role === 'admin') demoEmail = 'dharshanrichyrich@gmail.com';
-
-    const demoPassword = 'dharshan2006';
-
-    let res = await login(demoEmail, demoPassword);
-    if (!res.success) {
-      const profileData = {
-        organizationName:
-          role === 'donor'
-            ? 'Deedarsh (The Green Bistro)'
-            : role === 'recipient'
-            ? 'Jersin (Peelamedu NGO Shelter)'
-            : role === 'admin'
-            ? 'Dharshan (Platform Admin)'
-            : undefined,
-        fullName:
-          role === 'volunteer'
-            ? 'Kumaran'
-            : role === 'admin'
-            ? 'Dharshan'
-            : undefined,
-        address: 'Saravanampatti, Coimbatore',
-        latitude: 11.0805,
-        longitude: 76.9942,
-        vehicleType: role === 'volunteer' ? 'CAR' : undefined,
-        vehicleCapacityKg: role === 'volunteer' ? 75 : undefined,
-        capacityMealsPerDay: role === 'recipient' ? 250 : undefined,
-      };
-      res = await register({
-        email: demoEmail,
-        password: demoPassword,
-        role,
-        profileData,
-      });
+    try {
+      const res = await apiClient.post('/auth/demo-login', { role });
+      if (res.data?.success) {
+        const { user: authUser, profile: authProfile, tokens } = res.data.data;
+        setUser(authUser);
+        setProfile(authProfile);
+        setAccessToken(tokens.accessToken);
+        localStorage.setItem('access_token', tokens.accessToken);
+        localStorage.setItem('refresh_token', tokens.refreshToken);
+        localStorage.setItem('user_info', JSON.stringify(authUser));
+        if (authProfile) {
+          localStorage.setItem('user_profile', JSON.stringify(authProfile));
+        }
+        return { success: true, user: authUser };
+      }
+      return { success: false, error: res.data?.error?.message || 'Demo login failed' };
+    } catch (err) {
+      const errorMsg = err.response?.data?.error?.message || err.message || 'Demo login failed';
+      return { success: false, error: errorMsg };
     }
-    return res;
   };
 
   const logout = async () => {

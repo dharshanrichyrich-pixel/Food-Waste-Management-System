@@ -88,25 +88,25 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans bg-grid">
+    <div className="min-h-screen bg-[#FAF8F5] text-slate-800 flex flex-col font-sans bg-warm-grid">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E2DC] pb-5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 font-mono">
-                Admin Console
+              <span className="text-xs font-bold uppercase tracking-wider text-[#1b4332] font-mono">
+                System Administrator Console
               </span>
-              <span className="text-slate-400">•</span>
-              <Badge variant="brand" size="sm">Pure MongoDB Atlas Active</Badge>
+              <span className="text-slate-300">•</span>
+              <Badge variant="forest" size="sm" dot>MongoDB Operational</Badge>
             </div>
             <h1 className="text-3xl font-extrabold text-slate-900 mt-1">
-              Agent Swarm Orchestration & Platform Telemetry
+              FoodFlow Network & Telemetry Control
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              Live telemetry across 6 autonomous AI agents, MongoDB users, and audit logs.
+              Live telemetry across autonomous AI agents, verified organizations, and audit logs.
             </p>
           </div>
 

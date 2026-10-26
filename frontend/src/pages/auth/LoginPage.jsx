@@ -4,7 +4,16 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Badge } from '../../components/ui/Badge';
-import { Mail, Lock, Building2, HeartHandshake, Truck, ShieldCheck } from 'lucide-react';
+import {
+  Mail,
+  Lock,
+  Building2,
+  HeartHandshake,
+  Truck,
+  ShieldCheck,
+  Leaf,
+  ArrowRight,
+} from 'lucide-react';
 
 export default function LoginPage() {
   const { login, quickDemoLogin } = useAuth();
@@ -16,6 +25,21 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(null);
 
+  const routeByRole = (role) => {
+    switch (role) {
+      case 'donor':
+        return '/donor';
+      case 'recipient':
+        return '/recipient';
+      case 'volunteer':
+        return '/volunteer';
+      case 'admin':
+        return '/admin';
+      default:
+        return '/dashboard';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -25,9 +49,10 @@ export default function LoginPage() {
     setLoading(false);
 
     if (res.success) {
-      navigate('/dashboard');
+      const destination = routeByRole(res.user?.role);
+      navigate(destination);
     } else {
-      setError(res.error);
+      setError(res.error || 'Authentication failed. Please verify credentials.');
     }
   };
 
@@ -38,35 +63,48 @@ export default function LoginPage() {
     setDemoLoading(null);
 
     if (res.success) {
-      navigate('/dashboard');
+      const destination = routeByRole(res.user?.role || role);
+      navigate(destination);
     } else {
-      setError(res.error);
+      setError(res.error || 'Demo authentication failed. Server connection error.');
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-[#F8FAFC] bg-grid">
-      <div className="w-full max-w-md space-y-6">
-        {/* Header */}
+    <div className="min-h-screen flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8 bg-[#FAF8F5] bg-warm-grid text-slate-800">
+      <div className="w-full max-w-lg space-y-6">
+        {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold uppercase tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            MongoDB Auth &bull; RBAC Secured
+          <Link to="/" className="inline-flex items-center gap-2 mb-2 focus:outline-none">
+            <div className="w-9 h-9 rounded-xl bg-[#1b4332] text-white flex items-center justify-center shadow-sm">
+              <Leaf className="w-5 h-5 fill-white stroke-white" />
+            </div>
+            <span className="font-extrabold text-2xl tracking-tight text-[#1b4332]">FoodFlow</span>
+          </Link>
+          <div className="flex items-center justify-center gap-2">
+            <Badge variant="forest" size="sm" dot>
+              VERIFIED AUTHENTICATION
+            </Badge>
+            <span className="text-xs text-slate-400">&bull;</span>
+            <span className="text-xs text-slate-500 font-medium">RBAC Security</span>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
-            Welcome Back
-          </h2>
-          <p className="text-xs text-slate-500">
-            Sign in to access your surplus food rescue dashboard
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mt-1">
+            Sign in to FoodFlow
+          </h1>
+          <p className="text-xs text-slate-600 max-w-sm mx-auto">
+            Access your surplus food rescue operations, matching telemetry, and logistics.
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="rounded-2xl bg-white border border-slate-200 p-6 sm:p-7 shadow-lg space-y-4">
+        <div className="rounded-2xl bg-white border border-[#E5E2DC] p-6 sm:p-8 shadow-sm space-y-5">
           {error && (
-            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-              {error}
+            <div
+              role="alert"
+              className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2.5"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
@@ -74,21 +112,22 @@ export default function LoginPage() {
             <Input
               label="Email Address"
               type="email"
-              placeholder="you@restaurant.com"
+              placeholder="you@organization.org"
               icon={Mail}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
             />
 
             <div className="space-y-1">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-700">
                   Password
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs text-emerald-600 hover:text-emerald-700 font-bold"
+                  className="text-xs text-[#1b4332] hover:text-[#143527] font-semibold hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -100,6 +139,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
               />
             </div>
 
@@ -107,95 +147,142 @@ export default function LoginPage() {
               type="submit"
               variant="primary"
               size="lg"
-              className="w-full mt-2 justify-center shadow-md shadow-emerald-500/20"
+              className="w-full mt-2 justify-center"
               isLoading={loading}
+              icon={ArrowRight}
+              iconPosition="right"
             >
               Sign In to Account
             </Button>
           </form>
 
-          <div className="relative my-5">
+          {/* Divider */}
+          <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200" />
+              <div className="w-full border-t border-[#E5E2DC]" />
             </div>
             <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-wider">
               <span className="bg-white px-3 text-slate-400">
-                Or Quick Test With Demo Role
+                Explore With Dedicated Role
               </span>
             </div>
           </div>
 
-          {/* Quick Demo Logins */}
-          <div className="grid grid-cols-2 gap-2.5">
+          {/* Demo Role Selection Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* 1. Volunteer */}
             <button
               type="button"
               onClick={() => handleDemoLogin('volunteer')}
               disabled={!!demoLoading}
-              className="p-3 rounded-xl bg-slate-50 hover:bg-sky-50/50 border border-slate-200 hover:border-sky-300 text-left transition-all flex flex-col justify-between shadow-sm"
+              className="p-3.5 rounded-xl bg-[#FAF8F5] hover:bg-[#F4EFE6] border border-[#E5E2DC] hover:border-[#1b4332]/40 text-left transition-all flex flex-col justify-between shadow-subtle group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1b4332]"
             >
-              <div className="flex items-center justify-between w-full mb-1">
-                <Truck className="w-4 h-4 text-sky-600" />
-                <Badge variant="blue" size="sm">Volunteer #1</Badge>
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-800 flex items-center justify-center">
+                  <Truck className="w-4 h-4" />
+                </div>
+                <Badge variant="blue" size="sm">Volunteer</Badge>
               </div>
-              <span className="text-xs font-bold text-slate-800">
-                Kumaran (Hero Courier)
-              </span>
+              <div>
+                <span className="text-xs font-bold text-slate-900 group-hover:text-[#1b4332] transition-colors block">
+                  Volunteer
+                </span>
+                <span className="text-[11px] text-slate-500 block leading-tight mt-0.5">
+                  Food Rescue Volunteer
+                </span>
+              </div>
+              {demoLoading === 'volunteer' && (
+                <span className="text-[10px] text-sky-700 font-semibold mt-1">Authenticating...</span>
+              )}
             </button>
 
+            {/* 2. Donor */}
             <button
               type="button"
               onClick={() => handleDemoLogin('donor')}
               disabled={!!demoLoading}
-              className="p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-200 hover:border-emerald-300 text-left transition-all flex flex-col justify-between shadow-sm"
+              className="p-3.5 rounded-xl bg-[#FAF8F5] hover:bg-[#F4EFE6] border border-[#E5E2DC] hover:border-[#1b4332]/40 text-left transition-all flex flex-col justify-between shadow-subtle group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1b4332]"
             >
-              <div className="flex items-center justify-between w-full mb-1">
-                <Building2 className="w-4 h-4 text-emerald-600" />
-                <Badge variant="brand" size="sm">Donor</Badge>
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <div className="w-7 h-7 rounded-lg bg-emerald-100 text-[#1b4332] flex items-center justify-center">
+                  <Building2 className="w-4 h-4" />
+                </div>
+                <Badge variant="forest" size="sm">Donor</Badge>
               </div>
-              <span className="text-xs font-bold text-slate-800">
-                Deedarsh (Bistro)
-              </span>
+              <div>
+                <span className="text-xs font-bold text-slate-900 group-hover:text-[#1b4332] transition-colors block">
+                  Donor
+                </span>
+                <span className="text-[11px] text-slate-500 block leading-tight mt-0.5">
+                  Restaurant / Food Donor
+                </span>
+              </div>
+              {demoLoading === 'donor' && (
+                <span className="text-[10px] text-emerald-700 font-semibold mt-1">Authenticating...</span>
+              )}
             </button>
 
+            {/* 3. Recipient */}
             <button
               type="button"
               onClick={() => handleDemoLogin('recipient')}
               disabled={!!demoLoading}
-              className="p-3 rounded-xl bg-slate-50 hover:bg-amber-50/50 border border-slate-200 hover:border-amber-300 text-left transition-all flex flex-col justify-between shadow-sm"
+              className="p-3.5 rounded-xl bg-[#FAF8F5] hover:bg-[#F4EFE6] border border-[#E5E2DC] hover:border-[#1b4332]/40 text-left transition-all flex flex-col justify-between shadow-subtle group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1b4332]"
             >
-              <div className="flex items-center justify-between w-full mb-1">
-                <HeartHandshake className="w-4 h-4 text-amber-600" />
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
+                  <HeartHandshake className="w-4 h-4" />
+                </div>
                 <Badge variant="amber" size="sm">Recipient</Badge>
               </div>
-              <span className="text-xs font-bold text-slate-800">
-                Jersin (NGO Shelter)
-              </span>
+              <div>
+                <span className="text-xs font-bold text-slate-900 group-hover:text-[#1b4332] transition-colors block">
+                  Recipient
+                </span>
+                <span className="text-[11px] text-slate-500 block leading-tight mt-0.5">
+                  NGO / Shelter
+                </span>
+              </div>
+              {demoLoading === 'recipient' && (
+                <span className="text-[10px] text-amber-700 font-semibold mt-1">Authenticating...</span>
+              )}
             </button>
 
+            {/* 4. Admin */}
             <button
               type="button"
               onClick={() => handleDemoLogin('admin')}
               disabled={!!demoLoading}
-              className="p-3 rounded-xl bg-slate-50 hover:bg-purple-50/50 border border-slate-200 hover:border-purple-300 text-left transition-all flex flex-col justify-between shadow-sm"
+              className="p-3.5 rounded-xl bg-[#FAF8F5] hover:bg-[#F4EFE6] border border-[#E5E2DC] hover:border-[#1b4332]/40 text-left transition-all flex flex-col justify-between shadow-subtle group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1b4332]"
             >
-              <div className="flex items-center justify-between w-full mb-1">
-                <ShieldCheck className="w-4 h-4 text-purple-600" />
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
                 <Badge variant="purple" size="sm">Admin</Badge>
               </div>
-              <span className="text-xs font-bold text-slate-800">
-                Dharshan (Admin)
-              </span>
+              <div>
+                <span className="text-xs font-bold text-slate-900 group-hover:text-[#1b4332] transition-colors block">
+                  Admin
+                </span>
+                <span className="text-[11px] text-slate-500 block leading-tight mt-0.5">
+                  System Administrator
+                </span>
+              </div>
+              {demoLoading === 'admin' && (
+                <span className="text-[10px] text-purple-700 font-semibold mt-1">Authenticating...</span>
+              )}
             </button>
           </div>
 
-          <div className="pt-2 text-center">
+          <div className="pt-2 text-center border-t border-[#E5E2DC]">
             <p className="text-xs text-slate-500">
-              Don't have an account?{' '}
+              Need an organization account?{' '}
               <Link
                 to="/register"
-                className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
+                className="font-bold text-[#1b4332] hover:text-[#143527] hover:underline"
               >
-                Register now
+                Register your facility
               </Link>
             </p>
           </div>

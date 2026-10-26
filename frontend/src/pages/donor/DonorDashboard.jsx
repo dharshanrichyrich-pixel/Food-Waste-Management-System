@@ -161,19 +161,19 @@ export default function DonorDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans bg-grid">
+    <div className="min-h-screen bg-[#FAF8F5] text-slate-800 flex flex-col font-sans bg-warm-grid">
       <Navbar />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Donor Banner */}
-        <div className="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="rounded-2xl bg-white border border-[#E5E2DC] p-6 sm:p-8 shadow-subtle flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f0f7f3] border border-[#b9ddc8] text-[#1b4332] text-xs font-bold uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-[#1b4332] animate-pulse" />
               Donor Facility Portal
             </div>
             <h1 className="text-3xl font-extrabold text-slate-900">
-              {profile?.organizationName || 'Deedarsh (The Green Bistro)'}
+              {profile?.organizationName || user?.name || user?.email?.split('@')[0] || 'Registered Donor Facility'}
             </h1>
             <p className="text-sm text-slate-500">
               Submit surplus food batches. The FoodAgent evaluates food freshness, detects visual quality factors, calculates shelf life, and dispatches to certified local shelters.
