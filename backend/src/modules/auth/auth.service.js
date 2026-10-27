@@ -7,7 +7,47 @@ import {
   DonorProfile,
   RecipientProfile,
   VolunteerProfile,
+  UserLoginLog,
 } from '../../models/mongoose/index.js';
+
+// Helper to record login activity and update user metadata in MongoDB
+const recordLoginSuccess = async (user, profile, loginType = 'STANDARD', clientIp = '127.0.0.1') => {
+  try {
+    const displayName =
+      profile?.fullName ||
+      profile?.organizationName ||
+      user.name ||
+      user.email.split('@')[0];
+    const organizationName = profile?.organizationName || user.organizationName || '';
+    const now = new Date();
+
+    // Update User document in MongoDB
+    await User.findByIdAndUpdate(user._id, {
+      $set: {
+        name: displayName,
+        organizationName,
+        lastLoginAt: now,
+        lastLoginIp: clientIp,
+      },
+      $inc: { loginCount: 1 },
+    });
+
+    // Write audit log to UserLoginLog collection in MongoDB
+    await UserLoginLog.create({
+      userId: user._id,
+      email: user.email,
+      role: user.role,
+      displayName,
+      organizationName,
+      loginAt: now,
+      ipAddress: clientIp,
+      loginType,
+      status: 'SUCCESS',
+    });
+  } catch (err) {
+    console.warn('[AuthService] Could not write login audit log:', err.message);
+  }
+};
 
 // Helper to sign JWT access token
 const generateAccessToken = (user) => {
@@ -37,7 +77,7 @@ export class AuthService {
   /**
    * Register a new user in MongoDB and create linked profile
    */
-  static async register({ email, password, role = 'donor', profileData = {} }) {
+  static async register({ email, password, role = 'donor', profileData = {}, clientIp = '127.0.0.1' }) {
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       throw new Error('An account with this email already exists');
@@ -97,12 +137,23 @@ export class AuthService {
       $push: { refreshTokens: { token: refreshToken, createdAt: new Date() } },
     });
 
+    await recordLoginSuccess(user, profile, 'REGISTRATION', clientIp);
+
+    const displayName =
+      profileData.fullName ||
+      profileData.organizationName ||
+      user.email.split('@')[0];
+
     return {
       user: {
         id: userId.toString(),
         email: user.email,
         role: user.role,
         isVerified: user.isVerified,
+        name: displayName,
+        organizationName: profileData.organizationName || '',
+        lastLoginAt: new Date(),
+        loginCount: 1,
       },
       profile,
       tokens: {
@@ -116,7 +167,7 @@ export class AuthService {
   /**
    * Authenticate user with email and password (with auto-provision for seamless demo/testing)
    */
-  static async login({ email, password }) {
+  static async login({ email, password, clientIp = '127.0.0.1' }) {
     const cleanEmail = email.trim().toLowerCase();
     let user = await User.findOne({ email: cleanEmail }).select(
       '+passwordHash +role +isVerified'
@@ -186,12 +237,25 @@ export class AuthService {
       },
     });
 
+    await recordLoginSuccess(user, profile, 'STANDARD', clientIp);
+
+    const displayName =
+      profile?.fullName ||
+      profile?.organizationName ||
+      user.name ||
+      user.email.split('@')[0];
+    const organizationName = profile?.organizationName || user.organizationName || '';
+
     return {
       user: {
         id: userId.toString(),
         email: user.email,
         role: user.role,
         isVerified: user.isVerified,
+        name: displayName,
+        organizationName,
+        lastLoginAt: new Date(),
+        loginCount: (user.loginCount || 0) + 1,
       },
       profile,
       tokens: {
@@ -205,7 +269,7 @@ export class AuthService {
   /**
    * Quick Test 1-Click Demo Login
    */
-  static async quickDemoLogin(role = 'donor') {
+  static async quickDemoLogin(role = 'donor', clientIp = '127.0.0.1') {
     const normalizedRole = role.toLowerCase();
     const demoEmail =
       normalizedRole === 'volunteer'
@@ -291,12 +355,25 @@ export class AuthService {
       },
     });
 
+    await recordLoginSuccess(user, profile, 'DEMO', clientIp);
+
+    const displayName =
+      profile?.fullName ||
+      profile?.organizationName ||
+      user.name ||
+      user.email.split('@')[0];
+    const organizationName = profile?.organizationName || user.organizationName || '';
+
     return {
       user: {
         id: userId.toString(),
         email: user.email,
         role: user.role,
         isVerified: user.isVerified,
+        name: displayName,
+        organizationName,
+        lastLoginAt: new Date(),
+        loginCount: (user.loginCount || 0) + 1,
       },
       profile,
       tokens: {

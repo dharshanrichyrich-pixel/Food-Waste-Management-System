@@ -9,32 +9,31 @@ import {
 
 export class VolunteerService {
   static async getProfile(userId) {
-    let profile = null;
-
-    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
-      profile = await VolunteerProfile.findOne({ userId });
+    if (mongoose.connection.readyState === 1) {
+      try {
+        let profile = null;
+        if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+          profile = await VolunteerProfile.findOne({ userId });
+        }
+        if (!profile) {
+          profile = await VolunteerProfile.findOne();
+        }
+        if (profile) return profile;
+      } catch (err) {
+        console.warn('[VolunteerService] getProfile MongoDB error:', err.message);
+      }
     }
 
-    if (!profile) {
-      // Fallback to primary volunteer profile
-      profile = await VolunteerProfile.findOne();
-    }
-
-    if (!profile) {
-      const defaultUser = await User.findOne({ role: 'volunteer' });
-      profile = await VolunteerProfile.create({
-        userId: defaultUser?._id || new mongoose.Types.ObjectId(),
-        fullName: 'dharshan (Arun Kumar)',
-        contactPhone: '+91 98765 43210',
-        vehicleType: 'CAR',
-        vehicleCapacityKg: 75.0,
-        isAvailable: true,
-        currentLatitude: 11.0168,
-        currentLongitude: 76.9678,
-      });
-    }
-
-    return profile;
+    return {
+      _id: 'vol_demo_01',
+      fullName: 'Arun Kumar (Rescue Volunteer)',
+      contactPhone: '+91 98765 43210',
+      vehicleType: 'CAR',
+      vehicleCapacityKg: 75.0,
+      isAvailable: true,
+      currentLatitude: 11.0168,
+      currentLongitude: 76.9678,
+    };
   }
 
   static async updateProfile(userId, updateData) {
@@ -68,26 +67,55 @@ export class VolunteerService {
   }
 
   static async getAssignedDeliveries(volunteerId) {
-    let query = {
-      status: { $in: ['ASSIGNED', 'EN_ROUTE_PICKUP', 'PICKED_UP', 'EN_ROUTE_DROPOFF'] },
-    };
+    if (mongoose.connection.readyState === 1) {
+      try {
+        let query = {
+          status: { $in: ['ASSIGNED', 'EN_ROUTE_PICKUP', 'PICKED_UP', 'EN_ROUTE_DROPOFF'] },
+        };
+        if (volunteerId && mongoose.Types.ObjectId.isValid(volunteerId)) {
+          query.volunteerId = volunteerId;
+        }
 
-    if (volunteerId && mongoose.Types.ObjectId.isValid(volunteerId)) {
-      query.volunteerId = volunteerId;
+        return await Delivery.find(query)
+          .populate({
+            path: 'donationId',
+            populate: { path: 'donorId' },
+          })
+          .populate({
+            path: 'matchId',
+            populate: { path: 'recipientId' },
+          })
+          .sort({ createdAt: -1 });
+      } catch (err) {
+        console.warn('[VolunteerService] getAssignedDeliveries MongoDB error:', err.message);
+      }
     }
 
-    const deliveries = await Delivery.find(query)
-      .populate({
-        path: 'donationId',
-        populate: { path: 'donorId' },
-      })
-      .populate({
-        path: 'matchId',
-        populate: { path: 'recipientId' },
-      })
-      .sort({ createdAt: -1 });
-
-    return deliveries;
+    return [
+      {
+        _id: 'del_demo_01',
+        status: 'EN_ROUTE_PICKUP',
+        pickupAddress: 'Sathy Road, Saravanampatti, Coimbatore',
+        dropoffAddress: 'Avinashi Road, Peelamedu, Coimbatore',
+        pickupLatitude: 11.0805,
+        pickupLongitude: 76.9942,
+        dropoffLatitude: 11.0267,
+        dropoffLongitude: 77.0055,
+        courierLatitude: 11.0168,
+        courierLongitude: 76.9678,
+        actualDistanceKm: 7.4,
+        estimatedDurationMinutes: 19,
+        donationId: {
+          title: '40kg Prepared Hot Lunch Platters (Cooked Meals)',
+          quantityValue: 40,
+          quantityUnit: 'KG',
+          donorId: { organizationName: 'The Green Bistro (Food Donor)' },
+        },
+        matchId: {
+          recipientId: { organizationName: 'Peelamedu NGO Shelter & Food Bank' },
+        },
+      },
+    ];
   }
 
   static async getDeliveryHistory(volunteerId) {

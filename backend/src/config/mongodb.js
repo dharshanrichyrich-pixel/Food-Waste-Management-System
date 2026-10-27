@@ -3,6 +3,9 @@ import { config } from './env.js';
 
 let isConnected = false;
 
+// Disable operation buffering so queries do not hang for 10s when MongoDB is offline
+mongoose.set('bufferCommands', false);
+
 export const connectMongoDB = async () => {
   if (isConnected) {
     return mongoose.connection;
@@ -11,12 +14,12 @@ export const connectMongoDB = async () => {
   try {
     const conn = await mongoose.connect(config.mongodbUri, {
       dbName: 'food_waste_auth',
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 15000,
+      serverSelectionTimeoutMS: 3000,
+      socketTimeoutMS: 15000,
+      connectTimeoutMS: 5000,
       maxPoolSize: 25,
       minPoolSize: 2,
-      autoIndex: true,
+      autoIndex: false,
     });
 
     isConnected = true;

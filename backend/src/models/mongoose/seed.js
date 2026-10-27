@@ -14,38 +14,38 @@ import {
 
 /**
  * Seed Coimbatore & Saravanampatti Live Demonstration Records in MongoDB
- * Role mappings:
- * - Admin: Dharshan
- * - Volunteer: Kumaran
- * - Donor: Deedarsh (The Green Bistro)
- * - NGO Recipient / Owner: Jersin (Peelamedu NGO Shelter)
+ * Professional Role mappings:
+ * - Admin: System Administrator
+ * - Volunteer: Food Rescue Volunteer (Arun Kumar)
+ * - Donor: The Green Bistro (Restaurant / Food Donor)
+ * - NGO Recipient: Peelamedu NGO Shelter & Food Bank
  */
 export async function seedMongoDbIfEmpty() {
   try {
     const userCount = await User.countDocuments();
     if (userCount > 0) {
-      console.log(`[MongoDB Seeder] Database contains ${userCount} users. Ensuring Dharshan, Kumaran, Deedarsh, and Jersin are configured...`);
+      console.log(`[MongoDB Seeder] Database contains ${userCount} users. Ensuring authentic role profiles are configured...`);
     }
 
-    const defaultPasswordHash = await User.hashPassword('dharshan2006');
+    const defaultPasswordHash = await User.hashPassword('FoodFlowSecure2026!');
 
-    // 1. Volunteer User: Kumaran
-    let kumaranUser = await User.findOne({ email: 'kumaran@foodflow.org' });
+    // 1. Volunteer User
+    let kumaranUser = await User.findOne({ email: { $in: ['volunteer@foodflow.org', 'kumaran@foodflow.org'] } });
     if (!kumaranUser) {
       kumaranUser = await User.create({
-        email: 'kumaran@foodflow.org',
+        email: 'volunteer@foodflow.org',
         passwordHash: defaultPasswordHash,
         role: 'volunteer',
         isVerified: true,
       });
-      console.log('[MongoDB Seeder] Created volunteer user: kumaran@foodflow.org');
+      console.log('[MongoDB Seeder] Created volunteer user: volunteer@foodflow.org');
     }
 
     let kumaranProfile = await VolunteerProfile.findOne({ userId: kumaranUser._id });
     if (!kumaranProfile) {
       kumaranProfile = await VolunteerProfile.create({
         userId: kumaranUser._id,
-        fullName: 'Kumaran',
+        fullName: 'Arun Kumar (Rescue Volunteer)',
         contactPhone: '+91 98765 43210',
         vehicleType: 'CAR',
         vehicleCapacityKg: 75.0,
@@ -55,15 +55,15 @@ export async function seedMongoDbIfEmpty() {
         activeHours: '8:00 AM - 9:00 PM',
       });
     } else {
-      kumaranProfile.fullName = 'Kumaran';
+      kumaranProfile.fullName = 'Arun Kumar (Rescue Volunteer)';
       await kumaranProfile.save();
     }
 
-    // 2. Donor User: Deedarsh (The Green Bistro, Saravanampatti)
-    let deedarshUser = await User.findOne({ email: 'deedarsh@greenbistro.com' });
+    // 2. Donor User
+    let deedarshUser = await User.findOne({ email: { $in: ['donor@greenbistro.com', 'deedarsh@greenbistro.com'] } });
     if (!deedarshUser) {
       deedarshUser = await User.create({
-        email: 'deedarsh@greenbistro.com',
+        email: 'donor@greenbistro.com',
         passwordHash: defaultPasswordHash,
         role: 'donor',
         isVerified: true,
@@ -74,24 +74,24 @@ export async function seedMongoDbIfEmpty() {
     if (!deedarshProfile) {
       deedarshProfile = await DonorProfile.create({
         userId: deedarshUser._id,
-        organizationName: 'Deedarsh (The Green Bistro)',
+        organizationName: 'The Green Bistro (Food Donor)',
         contactPhone: '+91 98200 11223',
         address: 'Sathy Road, Saravanampatti, Coimbatore, Tamil Nadu 641035',
         latitude: 11.0805, // Saravanampatti
         longitude: 76.9942,
         donorType: 'RESTAURANT',
       });
-      console.log('[MongoDB Seeder] Created donor: Deedarsh (The Green Bistro)');
+      console.log('[MongoDB Seeder] Created donor: The Green Bistro (Food Donor)');
     } else {
-      deedarshProfile.organizationName = 'Deedarsh (The Green Bistro)';
+      deedarshProfile.organizationName = 'The Green Bistro (Food Donor)';
       await deedarshProfile.save();
     }
 
-    // 3. Recipient NGO User: Jersin (Peelamedu NGO Shelter)
-    let jersinUser = await User.findOne({ email: 'jersin@peelamedu.org' });
+    // 3. Recipient NGO User
+    let jersinUser = await User.findOne({ email: { $in: ['shelter@peelamedu.org', 'jersin@peelamedu.org'] } });
     if (!jersinUser) {
       jersinUser = await User.create({
-        email: 'jersin@peelamedu.org',
+        email: 'shelter@peelamedu.org',
         passwordHash: defaultPasswordHash,
         role: 'recipient',
         isVerified: true,
@@ -102,7 +102,7 @@ export async function seedMongoDbIfEmpty() {
     if (!jersinProfile) {
       jersinProfile = await RecipientProfile.create({
         userId: jersinUser._id,
-        organizationName: 'Jersin (Peelamedu NGO Shelter)',
+        organizationName: 'Peelamedu NGO Shelter & Food Bank',
         contactPhone: '+91 98400 44556',
         address: 'Avinashi Road, Peelamedu, Coimbatore, Tamil Nadu 641004',
         latitude: 11.0267, // Peelamedu
@@ -110,32 +110,22 @@ export async function seedMongoDbIfEmpty() {
         recipientType: 'SHELTER',
         capacityMealsPerDay: 250,
       });
-      console.log('[MongoDB Seeder] Created recipient NGO: Jersin (Peelamedu NGO Shelter)');
+      console.log('[MongoDB Seeder] Created recipient NGO: Peelamedu NGO Shelter & Food Bank');
     } else {
-      jersinProfile.organizationName = 'Jersin (Peelamedu NGO Shelter)';
+      jersinProfile.organizationName = 'Peelamedu NGO Shelter & Food Bank';
       await jersinProfile.save();
     }
 
-    // 4. Admin User: Dharshan
-    let dharshanAdminUser = await User.findOne({ email: 'dharshanrichyrich@gmail.com' });
+    // 4. Admin User
+    let dharshanAdminUser = await User.findOne({ email: { $in: ['admin@foodflow.ai', 'dharshan@foodflow.org'] } });
     if (!dharshanAdminUser) {
       dharshanAdminUser = await User.create({
-        email: 'dharshanrichyrich@gmail.com',
+        email: 'admin@foodflow.ai',
         passwordHash: defaultPasswordHash,
         role: 'admin',
         isVerified: true,
       });
-      console.log('[MongoDB Seeder] Created admin user: dharshanrichyrich@gmail.com (Dharshan)');
-    }
-
-    let dharshanOrgUser = await User.findOne({ email: 'dharshan@foodflow.org' });
-    if (!dharshanOrgUser) {
-      dharshanOrgUser = await User.create({
-        email: 'dharshan@foodflow.org',
-        passwordHash: defaultPasswordHash,
-        role: 'admin',
-        isVerified: true,
-      });
+      console.log('[MongoDB Seeder] Created admin user: admin@foodflow.ai');
     }
 
     // 5. Active Live Demonstration Donation: Deedarsh -> Jersin (Couriered by Kumaran)
@@ -169,7 +159,7 @@ export async function seedMongoDbIfEmpty() {
       console.log('[MongoDB Seeder] Created sample donation: 40kg Prepared Lunch Platters');
     }
 
-    // 6. Match Proposal: Deedarsh to Jersin
+    // 6. Match Proposal: The Green Bistro to Peelamedu NGO Shelter
     let sampleMatch = await Match.findOne({ donationId: sampleDonation._id });
     if (!sampleMatch) {
       sampleMatch = await Match.create({
@@ -180,10 +170,10 @@ export async function seedMongoDbIfEmpty() {
         distanceKm: 6.2,
         estimatedTransitMinutes: 18,
       });
-      console.log('[MongoDB Seeder] Created match between Deedarsh and Jersin');
+      console.log('[MongoDB Seeder] Created match between The Green Bistro and Peelamedu NGO Shelter');
     }
 
-    // 7. Active Courier Dispatch: Assigned to Kumaran
+    // 7. Active Courier Dispatch: Assigned to Rescue Volunteer
     let sampleDelivery = await Delivery.findOne({ matchId: sampleMatch._id });
     if (!sampleDelivery) {
       sampleDelivery = await Delivery.create({
@@ -196,7 +186,7 @@ export async function seedMongoDbIfEmpty() {
         estimatedDurationMinutes: 18,
         actualDistanceKm: 6.2,
       });
-      console.log('[MongoDB Seeder] Created delivery assignment for Kumaran');
+      console.log('[MongoDB Seeder] Created delivery assignment for Rescue Volunteer');
     }
 
     // 8. Global Impact Metrics
@@ -213,7 +203,7 @@ export async function seedMongoDbIfEmpty() {
       console.log('[MongoDB Seeder] Seeded global impact metrics');
     }
 
-    console.log('[MongoDB Seeder] Database seeded with Dharshan (Admin), Kumaran (Volunteer), Deedarsh (Donor), and Jersin (Recipient).');
+    console.log('[MongoDB Seeder] Database seeded with Admin, Volunteer, Donor, and Recipient role profiles.');
   } catch (error) {
     console.error('[MongoDB Seeder] Seeding error:', error.message);
   }

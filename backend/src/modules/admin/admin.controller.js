@@ -16,6 +16,19 @@ export const AdminController = {
   },
 
   /**
+   * GET /api/v1/admin/login-logs
+   * Lists chronological login audit events from MongoDB
+   */
+  async listLoginLogs(req, res, next) {
+    try {
+      const logs = await AdminService.listLoginLogs();
+      return sendSuccess(res, logs, 'User login audit logs retrieved successfully');
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
    * PATCH /api/v1/admin/users/:id
    */
   async updateUser(req, res, next) {

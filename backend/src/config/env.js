@@ -7,7 +7,7 @@ export const config = {
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
   mongodbUri:
     process.env.MONGODB_URI ||
-    'mongodb+srv://dharshanrichyrich_db_user:dharshan2006@cluster0.18yqa28.mongodb.net/food_waste_auth?retryWrites=true&w=majority',
+    'mongodb+srv://dharshanrichyrich_db_user:dharshan200618@cluster0.18yqa28.mongodb.net/food_waste_auth?retryWrites=true&w=majority',
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET || 'food_waste_dev_access_secret_key_2026',
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'food_waste_dev_refresh_secret_key_2026',

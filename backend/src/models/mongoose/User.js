@@ -31,6 +31,28 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    name: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    organizationName: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    lastLoginAt: {
+      type: Date,
+      default: null,
+    },
+    loginCount: {
+      type: Number,
+      default: 0,
+    },
+    lastLoginIp: {
+      type: String,
+      default: '',
+    },
     refreshTokens: [
       {
         token: { type: String, required: true },

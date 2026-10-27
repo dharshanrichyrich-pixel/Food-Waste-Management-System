@@ -10,11 +10,14 @@ import {
   Bot,
   Database,
   RefreshCw,
+  Clock,
+  UserCheck,
 } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [telemetry, setTelemetry] = useState(null);
   const [users, setUsers] = useState([]);
+  const [loginLogs, setLoginLogs] = useState([]);
   const [impact, setImpact] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('telemetry');
@@ -26,15 +29,17 @@ export default function AdminDashboard() {
   const fetchAdminData = async () => {
     setLoading(true);
     try {
-      const [telemetryRes, usersRes, impactRes] = await Promise.all([
+      const [telemetryRes, usersRes, impactRes, logsRes] = await Promise.all([
         api.get('/admin/telemetry'),
         api.get('/admin/users'),
         api.get('/analytics/impact'),
+        api.get('/admin/login-logs'),
       ]);
 
       if (telemetryRes.data?.success) setTelemetry(telemetryRes.data.data);
       if (usersRes.data?.success) setUsers(usersRes.data.data);
       if (impactRes.data?.success) setImpact(impactRes.data.data);
+      if (logsRes?.data?.success) setLoginLogs(logsRes.data.data);
     } catch (err) {
       console.warn('Using local admin fallback data:', err.message);
       setTelemetry({
@@ -191,6 +196,18 @@ export default function AdminDashboard() {
             <Database className="w-4 h-4" />
             MongoDB User Store ({users.length})
           </button>
+
+          <button
+            onClick={() => setActiveTab('logins')}
+            className={`pb-3 text-sm font-bold transition-colors flex items-center gap-2 ${
+              activeTab === 'logins'
+                ? 'border-b-2 border-emerald-600 text-emerald-700'
+                : 'text-slate-500 hover:text-slate-900'
+            }`}
+          >
+            <Clock className="w-4 h-4" />
+            Who Logged In ({loginLogs.length})
+          </button>
         </div>
 
         {/* Tab 1: Agent Swarm Telemetry */}
@@ -260,22 +277,27 @@ export default function AdminDashboard() {
         {/* Tab 2: MongoDB User Management */}
         {activeTab === 'users' && (
           <div className="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-slate-100 bg-slate-50">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                MongoDB `users` Collection
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Full RBAC profile management in MongoDB Atlas database `food_waste_auth`.
-              </p>
+            <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  MongoDB `users` Collection ({users.length} Registered Accounts)
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Full RBAC accounts and connected profiles in MongoDB Atlas database `food_waste_auth`.
+                </p>
+              </div>
+              <Badge variant="brand" size="sm">Atlas Live Connected</Badge>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 text-[11px] uppercase font-bold text-slate-500">
                   <tr>
-                    <th className="py-3 px-4">User ID</th>
+                    <th className="py-3 px-4">User / Name</th>
                     <th className="py-3 px-4">Email</th>
                     <th className="py-3 px-4">Role</th>
+                    <th className="py-3 px-4">Organization / Facility</th>
+                    <th className="py-3 px-4">Last Login</th>
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4 text-right">Action</th>
                   </tr>
@@ -283,8 +305,10 @@ export default function AdminDashboard() {
                 <tbody className="divide-y divide-slate-100 text-slate-700">
                   {users.map((usr) => (
                     <tr key={usr._id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-4 font-mono text-[11px] text-slate-400">{(usr._id || '').substring(0, 12)}...</td>
-                      <td className="py-3 px-4 font-bold text-slate-900">{usr.email}</td>
+                      <td className="py-3 px-4 font-bold text-slate-900">
+                        {usr.fullName || usr.email.split('@')[0]}
+                      </td>
+                      <td className="py-3 px-4 text-slate-600 font-mono text-[11px]">{usr.email}</td>
                       <td className="py-3 px-4">
                         <Badge
                           variant={
@@ -302,6 +326,12 @@ export default function AdminDashboard() {
                           {usr.role}
                         </Badge>
                       </td>
+                      <td className="py-3 px-4 text-slate-700 font-medium">
+                        {usr.organizationName || '—'}
+                      </td>
+                      <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">
+                        {usr.lastLoginAt ? new Date(usr.lastLoginAt).toLocaleString() : 'Recent'}
+                      </td>
                       <td className="py-3 px-4">
                         <Badge variant={usr.isVerified ? 'brand' : 'slate'} size="sm">
                           {usr.isVerified ? 'VERIFIED' : 'PENDING'}
@@ -315,6 +345,85 @@ export default function AdminDashboard() {
                         >
                           {usr.isVerified ? 'Revoke Access' : 'Authorize & Verify'}
                         </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Who Logged In - Realtime Login Audit Trail */}
+        {activeTab === 'logins' && (
+          <div className="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <UserCheck className="w-4 h-4 text-emerald-700" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    MongoDB `userloginlogs` Collection — Who Logged In Audit History
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Chronological record of every user login, role, organization, and timestamp recorded in MongoDB.
+                </p>
+              </div>
+              <Badge variant="brand" size="sm">{loginLogs.length} Logged Events</Badge>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 text-[11px] uppercase font-bold text-slate-500">
+                  <tr>
+                    <th className="py-3 px-4">Logged In User</th>
+                    <th className="py-3 px-4">Email</th>
+                    <th className="py-3 px-4">Role</th>
+                    <th className="py-3 px-4">Organization / Kitchen</th>
+                    <th className="py-3 px-4">Login Timestamp</th>
+                    <th className="py-3 px-4">Method</th>
+                    <th className="py-3 px-4 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {loginLogs.map((log) => (
+                    <tr key={log._id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3 px-4 font-bold text-slate-900">
+                        {log.displayName || log.email.split('@')[0]}
+                      </td>
+                      <td className="py-3 px-4 text-slate-600 font-mono text-[11px]">{log.email}</td>
+                      <td className="py-3 px-4">
+                        <Badge
+                          variant={
+                            log.role === 'donor'
+                              ? 'brand'
+                              : log.role === 'recipient'
+                              ? 'amber'
+                              : log.role === 'volunteer'
+                              ? 'cyan'
+                              : 'slate'
+                          }
+                          size="sm"
+                          className="font-mono text-[10px] uppercase"
+                        >
+                          {log.role}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4 text-slate-700 font-medium">
+                        {log.organizationName || '—'}
+                      </td>
+                      <td className="py-3 px-4 text-slate-600 font-mono text-[11px]">
+                        {log.loginAt ? new Date(log.loginAt).toLocaleString() : 'Just now'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge variant="slate" size="sm" className="font-mono text-[10px]">
+                          {log.loginType || 'STANDARD'}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <Badge variant="brand" size="sm">
+                          {log.status || 'SUCCESS'}
+                        </Badge>
                       </td>
                     </tr>
                   ))}

@@ -10,3 +10,4 @@ export { Route } from './Route.js';
 export { Notification } from './Notification.js';
 export { ImpactMetric } from './ImpactMetric.js';
 export { AgentJobLog } from './AgentJobLog.js';
+export { UserLoginLog } from './UserLoginLog.js';

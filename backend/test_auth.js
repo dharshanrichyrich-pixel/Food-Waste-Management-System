@@ -1,8 +1,10 @@
 import { AuthService } from './src/modules/auth/auth.service.js';
 import jwt from 'jsonwebtoken';
 import { config } from './src/config/env.js';
+import { connectMongoDB } from './src/config/mongodb.js';
 
 async function runAuthTests() {
+  await connectMongoDB();
   console.log('🧪 Starting Auth Module Unit & Integration Tests (MongoDB + Postgres Profile linking)...');
 
   // Test 1: Register Donor

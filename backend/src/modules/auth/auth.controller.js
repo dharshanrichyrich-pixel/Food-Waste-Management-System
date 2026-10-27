@@ -31,8 +31,9 @@ export class AuthController {
   static async signup(req, res) {
     try {
       const validated = signupSchema.parse(req.body);
-      const result = await AuthService.register(validated);
-      return sendSuccess(res, result, 'User registered successfully (MongoDB Auth + PostgreSQL Profile)', 201);
+      const clientIp = req.ip || req.connection?.remoteAddress || '127.0.0.1';
+      const result = await AuthService.register({ ...validated, clientIp });
+      return sendSuccess(res, result, 'User registered successfully (MongoDB Auth + Profile)', 201);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return sendError(res, { message: 'Validation Error', details: error.errors }, 400);
@@ -44,7 +45,8 @@ export class AuthController {
   static async login(req, res) {
     try {
       const validated = loginSchema.parse(req.body);
-      const result = await AuthService.login(validated);
+      const clientIp = req.ip || req.connection?.remoteAddress || '127.0.0.1';
+      const result = await AuthService.login({ ...validated, clientIp });
       return sendSuccess(res, result, 'Logged in successfully');
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -62,7 +64,8 @@ export class AuthController {
       if (!validRoles.includes(normalizedRole)) {
         return sendError(res, 'Invalid role requested for demo authentication', 400);
       }
-      const result = await AuthService.quickDemoLogin(normalizedRole);
+      const clientIp = req.ip || req.connection?.remoteAddress || '127.0.0.1';
+      const result = await AuthService.quickDemoLogin(normalizedRole, clientIp);
       return sendSuccess(res, result, `Authenticated legitimately as demo ${normalizedRole}`);
     } catch (error) {
       return sendError(res, error.message, 400);
