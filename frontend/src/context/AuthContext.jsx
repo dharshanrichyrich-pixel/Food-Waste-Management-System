@@ -58,7 +58,10 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, error: res.data?.error?.message || 'Login failed' };
     } catch (err) {
-      const errorMsg = err.response?.data?.error?.message || err.message || 'Login failed';
+      let errorMsg = err.response?.data?.error?.message || err.message || 'Login failed';
+      if (err.code === 'ECONNABORTED' || String(errorMsg).includes('timeout')) {
+        errorMsg = 'Connection timed out. If using the cloud Vercel link, the Render backend is currently degraded/disconnected from MongoDB. Please test on http://localhost:5173 or check Render environment variables.';
+      }
       return { success: false, error: errorMsg };
     }
   };
